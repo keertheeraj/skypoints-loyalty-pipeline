@@ -230,3 +230,6 @@ profiles.yml
 # dbt
 dbt_packages/
 logs/
+
+# Editor
+.vscode/
