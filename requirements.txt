@@ -1,6 +1,6 @@
 snowflake-connector-python
 pandas
-openpyxl
 python-dotenv
 pytest
-dbt-snowflake
+dbt-core==1.12.7
+dbt-snowflake==1.12.5
