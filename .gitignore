@@ -216,6 +216,15 @@ tempCodeRunnerFile.py
 
 # Marimo
 marimo/_static/
+
+# Secrets
+*.p8
+*.pem
+profiles.yml
+
+# dbt
+dbt_packages/
+logs/
 marimo/_lsp/
 __marimo__/
 
