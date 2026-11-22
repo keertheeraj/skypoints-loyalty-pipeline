@@ -1,0 +1,101 @@
+version: 2
+
+models:
+  - name: stg_members
+    description: Member lines (record type D) cleaned and typed. Append only, one row per file line.
+    columns:
+      - name: member_id
+        description: Member key
+        data_tests:
+          - not_null
+          - max_length:
+              arguments:
+                length: 18
+      - name: member_name
+        description: Member name
+        data_tests:
+          - not_null
+          - max_length:
+              arguments:
+                length: 255
+      - name: enrollment_date
+        description: Parsed from YYYYMMDD, NULL when missing or invalid
+        data_tests:
+          - not_null
+      - name: last_flight_date
+        description: Parsed from YYYYMMDD, NULL when missing or invalid
+      - name: tier_code
+        description: Tier code as received, upper case
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['SLV', 'GLD', 'PLT']
+      - name: agent_name
+        description: Agent who enrolled the member
+      - name: state
+        description: State or province code
+        data_tests:
+          - max_length:
+              arguments:
+                length: 5
+      - name: country
+        description: Country code as received (for example AU, PHIL), upper case
+        data_tests:
+          - max_length:
+              arguments:
+                length: 5
+      - name: date_of_birth
+        description: Parsed from MMDDYYYY, NULL when missing, the text NULL, or invalid
+      - name: is_active
+        description: A active, I inactive
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['A', 'I']
+      - name: source_file_name
+        description: Staged file the row came from
+      - name: source_file_row_number
+        description: Line number in the source file
+      - name: loaded_at
+        description: When the row was loaded into RAW, drives incremental loads
+
+  - name: stg_redemptions
+    description: Redemption feed flattened to one row per transaction, cleaned and typed. Append only.
+    columns:
+      - name: member_id
+        description: Joins to stg_members.member_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_members')
+                field: member_id
+      - name: feed_date
+        description: Feed date from the JSON object
+      - name: txn_id
+        description: Transaction key
+        data_tests:
+          - not_null
+      - name: txn_date
+        description: Transaction date
+        data_tests:
+          - not_null
+      - name: partner
+        description: Partner airline
+      - name: miles_redeemed
+        description: Miles redeemed, NULL when not numeric
+        data_tests:
+          - not_null
+          - non_negative
+      - name: status
+        description: Status as received, upper case
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['COMPLETED', 'PENDING', 'CANCELLED']
+      - name: source_file_name
+        description: Staged file the row came from
+      - name: source_file_row_number
+        description: Line number in the source file
+      - name: loaded_at
+        description: When the row was loaded into RAW, drives incremental loads
