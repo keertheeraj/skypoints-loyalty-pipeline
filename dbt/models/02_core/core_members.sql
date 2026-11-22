@@ -64,11 +64,11 @@ final as (
         date_of_birth,
         is_active,
 
-        floor(months_between('{{ var("run_date") }}'::date, date_of_birth) / 12)::int as age,
+        floor(months_between(current_date, date_of_birth) / 12)::int as age,
 
         case
             when last_flight_date is null then true
-            when datediff('day', last_flight_date, '{{ var("run_date") }}'::date) > {{ var('stale_after_days') }} then true
+            when datediff('day', last_flight_date, current_date) > {{ var('stale_after_days') }} then true
             else false
         end as stale_member,
 
