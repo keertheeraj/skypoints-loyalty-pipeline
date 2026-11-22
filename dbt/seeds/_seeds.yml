@@ -1,0 +1,11 @@
+version: 2
+
+seeds:
+  - name: country_mapping
+    description: Maps source country codes (AU, PHIL) to ISO codes and target country tables
+    config:
+      column_types:
+        source_country_code: varchar
+        country_code: varchar
+        country_name: varchar
+        target_table: varchar
