@@ -1,0 +1,76 @@
+version: 2
+
+models:
+  - name: core_members
+    description: Single source of truth for members. One row per member, latest valid record wins.
+    columns:
+      - name: member_id
+        description: Member key
+        data_tests:
+          - unique
+          - not_null
+      - name: member_name
+        data_tests:
+          - not_null
+      - name: enrollment_date
+        data_tests:
+          - not_null
+      - name: last_flight_date
+        description: NULL when never flown or invalid in source
+      - name: tier_code
+      - name: agent_name
+      - name: state
+      - name: country_code
+        description: ISO country code from country_mapping
+        data_tests:
+          - not_null
+      - name: country_name
+      - name: target_table
+        description: Country table the member belongs to
+        data_tests:
+          - not_null
+      - name: date_of_birth
+      - name: is_active
+      - name: age
+        description: Whole years between date_of_birth and run_date; NULL when DOB is unknown
+      - name: stale_member
+        description: TRUE when the last flight is more than stale_after_days before run_date, or there is no flight
+        data_tests:
+          - not_null
+      - name: file_timestamp
+        description: Timestamp of the file the winning record came from
+      - name: source_file_name
+      - name: loaded_at
+
+  - name: core_redemptions
+    description: One row per redemption transaction, latest status wins, known members only.
+    columns:
+      - name: txn_id
+        description: Transaction key
+        data_tests:
+          - unique
+          - not_null
+      - name: member_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('core_members')
+                field: member_id
+      - name: txn_date
+        data_tests:
+          - not_null
+      - name: partner
+      - name: miles_redeemed
+        data_tests:
+          - not_null
+          - non_negative
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['COMPLETED', 'PENDING', 'CANCELLED']
+      - name: feed_date
+      - name: file_timestamp
+      - name: source_file_name
+      - name: loaded_at
