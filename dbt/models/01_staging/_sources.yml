@@ -1,0 +1,62 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Files loaded as is by the Snowflake load tasks
+    database: SKYPOINTS_DEV
+    schema: RAW
+    loaded_at_field: LOADED_AT
+    freshness:
+      warn_after: {count: 24, period: hour}
+      error_after: {count: 48, period: hour}
+
+    tables:
+      - name: members
+        identifier: MEMBERS
+        description: Member details from the member flat file, one row per file line
+        columns:
+          - name: RECORD_TYPE
+            description: H header line, D member line
+          - name: MEMBER_NAME
+            description: Member name as received
+          - name: MEMBER_ID
+            description: Member id as received
+          - name: ENROLLMENT_DATE
+            description: Enrollment date as text, expected YYYYMMDD
+          - name: LAST_FLIGHT_DATE
+            description: Last flight date as text, expected YYYYMMDD
+          - name: TIER_CODE
+            description: Tier code as received (SLV, GLD, PLT)
+          - name: AGENT_NAME
+            description: Agent name as received
+          - name: STATE
+            description: State or province as received
+          - name: COUNTRY
+            description: Country code as received (for example AU, PHIL)
+          - name: DOB
+            description: Date of birth as text, expected MMDDYYYY
+          - name: IS_ACTIVE
+            description: A active, I inactive
+          - name: SOURCE_FILE_NAME
+            description: Staged file path the row came from
+            data_tests:
+              - not_null
+          - name: SOURCE_FILE_ROW_NUMBER
+            description: Line number in the source file
+          - name: LOADED_AT
+            description: When the row was loaded into RAW
+
+      - name: redemptions
+        identifier: REDEMPTIONS
+        description: Redemptions from the partner JSON feed, one row per member object
+        columns:
+          - name: RAW_PAYLOAD
+            description: Whole JSON object with nested redemptions array
+          - name: SOURCE_FILE_NAME
+            description: Staged file path the row came from
+            data_tests:
+              - not_null
+          - name: SOURCE_FILE_ROW_NUMBER
+            description: Line number in the source file
+          - name: LOADED_AT
+            description: When the row was loaded into RAW

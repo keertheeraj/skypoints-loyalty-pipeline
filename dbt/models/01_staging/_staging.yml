@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: stg_members
+    description: Member lines (record type D) cleaned and typed. Append only, one row per file line.
+    columns:
+      - name: member_id
+        description: Member key
+      - name: member_name
+        description: Member name
+      - name: enrollment_date
+        description: Parsed from YYYYMMDD, NULL when missing or invalid
+      - name: last_flight_date
+        description: Parsed from YYYYMMDD, NULL when missing or invalid
+      - name: tier_code
+        description: Tier code as received, upper case
+      - name: agent_name
+        description: Agent who enrolled the member
+      - name: state
+        description: State or province code
+      - name: country
+        description: Country code as received (for example AU, PHIL), upper case
+      - name: date_of_birth
+        description: Parsed from MMDDYYYY, NULL when missing, the text NULL, or invalid
+      - name: is_active
+        description: A active, I inactive
+      - name: source_file_name
+        description: Staged file the row came from
+      - name: source_file_row_number
+        description: Line number in the source file
+      - name: loaded_at
+        description: When the row was loaded into RAW, drives incremental loads
+
+  - name: stg_redemptions
+    description: Redemption feed flattened to one row per transaction, cleaned and typed. Append only.
+    columns:
+      - name: member_id
+        description: Joins to stg_members.member_id
+      - name: feed_date
+        description: Feed date from the JSON object
+      - name: txn_id
+        description: Transaction key
+      - name: txn_date
+        description: Transaction date
+      - name: partner
+        description: Partner airline
+      - name: miles_redeemed
+        description: Miles redeemed, NULL when not numeric
+      - name: status
+        description: Status as received, upper case
+      - name: source_file_name
+        description: Staged file the row came from
+      - name: source_file_row_number
+        description: Line number in the source file
+      - name: loaded_at
+        description: When the row was loaded into RAW, drives incremental loads
