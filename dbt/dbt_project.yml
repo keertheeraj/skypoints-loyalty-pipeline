@@ -17,15 +17,23 @@ clean-targets:
 flags:
   manage_state: false
 
+vars:
+  run_date: '2024-01-16'
+  stale_after_days: 90
+
 models:
   skypoints_transformations:
     +materialized: table
+
+seeds:
+  skypoints_transformations:
+    +schema: REFERENCE
 
 data_tests:
   skypoints_transformations:
     +severity: error
     +store_failures: true
     +schema: TEST_FAILURES
-    # Staging only reports bad rows; core will filter them and fail on its own tests
+    # Staging only reports bad rows; core filters them and its tests are strict
     01_staging:
       +severity: warn
