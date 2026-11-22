@@ -14,6 +14,18 @@ clean-targets:
   - "target"
   - "dbt_packages"
 
+flags:
+  manage_state: false
+
 models:
   skypoints_transformations:
     +materialized: table
+
+data_tests:
+  skypoints_transformations:
+    +severity: error
+    +store_failures: true
+    +schema: TEST_FAILURES
+    # Staging only reports bad rows; core will filter them and fail on its own tests
+    01_staging:
+      +severity: warn
