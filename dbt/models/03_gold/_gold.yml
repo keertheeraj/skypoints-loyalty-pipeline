@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: usa_member
+    description: Members routed to the United States
+    columns: &country_member_columns
+      - name: member_id
+        data_tests:
+          - unique
+          - not_null
+      - name: member_name
+      - name: enrollment_date
+      - name: last_flight_date
+      - name: tier_code
+      - name: agent_name
+      - name: state
+      - name: country_code
+      - name: country_name
+      - name: date_of_birth
+      - name: age
+      - name: stale_member
+      - name: is_active
+
+  - name: india_member
+    description: Members routed to India
+    columns: *country_member_columns
+
+  - name: philippines_member
+    description: Members routed to the Philippines
+    columns: *country_member_columns
+
+  - name: canada_member
+    description: Members routed to Canada
+    columns: *country_member_columns
+
+  - name: australia_member
+    description: Members routed to Australia
+    columns: *country_member_columns
+
+  - name: member_redemptions
+    description: Redemption transactions with member name, tier and country
+    columns:
+      - name: txn_id
+        data_tests:
+          - unique
+          - not_null
+      - name: member_id
+        data_tests:
+          - not_null
