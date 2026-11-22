@@ -1,0 +1,11 @@
+source_country_code,country_code,country_name,target_table
+USA,USA,United States,usa_member
+US,USA,United States,usa_member
+IND,IND,India,india_member
+IN,IND,India,india_member
+PHIL,PHL,Philippines,philippines_member
+PHL,PHL,Philippines,philippines_member
+CAN,CAN,Canada,canada_member
+CA,CAN,Canada,canada_member
+AU,AUS,Australia,australia_member
+AUS,AUS,Australia,australia_member
