@@ -44,6 +44,10 @@ models:
           - max_length:
               arguments:
                 length: 5
+          - relationships:
+              arguments:
+                to: ref('country_mapping')
+                field: source_country_code
       - name: date_of_birth
         description: Parsed from MMDDYYYY, NULL when missing, the text NULL, or invalid
       - name: is_active
