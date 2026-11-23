@@ -5,10 +5,11 @@ sources:
     description: Files loaded as is by the Snowflake load tasks
     database: SKYPOINTS_DEV
     schema: RAW
-    loaded_at_field: LOADED_AT
-    freshness:
-      warn_after: {count: 24, period: hour}
-      error_after: {count: 48, period: hour}
+    config:
+      loaded_at_field: LOADED_AT
+      freshness:
+        warn_after: {count: 24, period: hour}
+        error_after: {count: 48, period: hour}
 
     tables:
       - name: members
