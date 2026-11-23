@@ -1,6 +1,9 @@
 -- One row per member: latest valid record wins, with country, Age and Stale_Member
+-- Age and Stale_Member use today, or --vars "{run_date: 'YYYY-MM-DD'}" to reproduce a past day
 
 {{ config(schema = 'CORE') }}
+
+{% set as_of_date = "'" ~ var('run_date', run_started_at.strftime('%Y-%m-%d')) ~ "'::date" %}
 
 with valid_members as (
 
@@ -38,12 +41,16 @@ with_country as (
 
 latest_record as (
 
-    -- Newest record wins, within a file, the last line wins
+    -- Newest file wins; then most recent flight; then file name and last line as final tie breakers
     select *
     from with_country
     qualify row_number() over (
         partition by member_id
-        order by file_timestamp desc, source_file_row_number desc
+        order by
+            file_timestamp desc,
+            last_flight_date desc nulls last,
+            source_file_name desc,
+            source_file_row_number desc
     ) = 1
 
 ),
@@ -64,11 +71,11 @@ final as (
         date_of_birth,
         is_active,
 
-        floor(months_between(current_date, date_of_birth) / 12)::int as age,
+        floor(months_between({{ as_of_date }}, date_of_birth) / 12)::int as age,
 
         case
             when last_flight_date is null then true
-            when datediff('day', last_flight_date, current_date) > {{ var('stale_after_days') }} then true
+            when datediff('day', last_flight_date, {{ as_of_date }}) > {{ var('stale_after_days') }} then true
             else false
         end as stale_member,
 

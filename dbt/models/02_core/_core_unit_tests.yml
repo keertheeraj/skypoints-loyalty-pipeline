@@ -1,0 +1,74 @@
+version: 2
+
+unit_tests:
+
+  - name: core_members_latest_record_wins
+    description: A member in two files keeps the newest one and moves country
+    model: core_members
+    given:
+      - input: ref('stg_members')
+        rows:
+          - {member_id: '223458', member_name: 'Ravi', enrollment_date: '2010-10-12', country: 'IND', source_file_name: 'members/2024/01/15/MEMBERS_20240115_02300000.dat', source_file_row_number: 3}
+          - {member_id: '223458', member_name: 'Ravi', enrollment_date: '2010-10-12', country: 'USA', source_file_name: 'members/2024/01/16/MEMBERS_20240116_02300000.dat', source_file_row_number: 2}
+      - input: ref('country_mapping')
+        rows:
+          - {source_country_code: 'IND', country_code: 'IND', target_table: 'india_member'}
+          - {source_country_code: 'USA', country_code: 'USA', target_table: 'usa_member'}
+    expect:
+      rows:
+        - {member_id: '223458', country_code: 'USA', target_table: 'usa_member'}
+
+  - name: core_members_excludes_invalid_rows
+    description: Missing mandatory fields or an unknown country keep a row out of core
+    model: core_members
+    given:
+      - input: ref('stg_members')
+        rows:
+          - {member_id: '1', member_name: 'Valid', enrollment_date: '2020-01-01', country: 'AU',  source_file_name: 'MEMBERS_20240116_02300000.dat', source_file_row_number: 2}
+          - {member_id: '2', member_name: null,    enrollment_date: '2020-01-01', country: 'AU',  source_file_name: 'MEMBERS_20240116_02300000.dat', source_file_row_number: 3}
+          - {member_id: '3', member_name: 'NoDate', enrollment_date: null,        country: 'AU',  source_file_name: 'MEMBERS_20240116_02300000.dat', source_file_row_number: 4}
+          - {member_id: '4', member_name: 'Japan', enrollment_date: '2020-01-01', country: 'JPN', source_file_name: 'MEMBERS_20240116_02300000.dat', source_file_row_number: 5}
+      - input: ref('country_mapping')
+        rows:
+          - {source_country_code: 'AU', country_code: 'AUS', target_table: 'australia_member'}
+    expect:
+      rows:
+        - {member_id: '1', country_code: 'AUS'}
+
+  - name: core_members_age_and_stale_member
+    description: Age in whole years; stale after 90 days or when never flown
+    model: core_members
+    overrides:
+      vars:
+        run_date: '2024-01-16'
+        stale_after_days: 90
+    given:
+      - input: ref('stg_members')
+        rows:
+          - {member_id: '1', member_name: 'Recent', enrollment_date: '2010-01-01', last_flight_date: '2024-01-12', date_of_birth: '1985-03-05', country: 'USA', source_file_name: 'MEMBERS_20240116_02300000.dat', source_file_row_number: 2}
+          - {member_id: '2', member_name: 'Old',    enrollment_date: '2010-01-01', last_flight_date: '2012-10-13', date_of_birth: '2000-01-16', country: 'USA', source_file_name: 'MEMBERS_20240116_02300000.dat', source_file_row_number: 3}
+          - {member_id: '3', member_name: 'Never',  enrollment_date: '2010-01-01', last_flight_date: null,         date_of_birth: null,         country: 'USA', source_file_name: 'MEMBERS_20240116_02300000.dat', source_file_row_number: 4}
+      - input: ref('country_mapping')
+        rows:
+          - {source_country_code: 'USA', country_code: 'USA', target_table: 'usa_member'}
+    expect:
+      rows:
+        - {member_id: '1', age: 38,   stale_member: false}
+        - {member_id: '2', age: 24,   stale_member: true}
+        - {member_id: '3', age: null, stale_member: true}
+
+  - name: core_redemptions_latest_status_wins
+    description: A transaction sent twice keeps the newest status; negative miles are excluded
+    model: core_redemptions
+    given:
+      - input: ref('stg_redemptions')
+        rows:
+          - {txn_id: 'RX10092', member_id: '223457', txn_date: '2024-01-13', miles_redeemed: 5000, status: 'PENDING',   source_file_name: 'REDEMPTIONS_20240115_02300000.json', source_file_row_number: 1}
+          - {txn_id: 'RX10092', member_id: '223457', txn_date: '2024-01-13', miles_redeemed: 5000, status: 'COMPLETED', source_file_name: 'REDEMPTIONS_20240116_02300000.json', source_file_row_number: 1}
+          - {txn_id: 'RX10301', member_id: '223457', txn_date: '2024-01-16', miles_redeemed: -500, status: 'COMPLETED', source_file_name: 'REDEMPTIONS_20240116_02300000.json', source_file_row_number: 4}
+      - input: ref('core_members')
+        rows:
+          - {member_id: '223457'}
+    expect:
+      rows:
+        - {txn_id: 'RX10092', status: 'COMPLETED'}

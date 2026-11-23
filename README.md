@@ -89,14 +89,14 @@ Validations come from the source contract: mandatory fields (member id, name, en
 lengths, accepted tiers and statuses, valid dates, non negative miles, and redemptions for known members only.
 
 ## What the brief asked, and where it lives
-
+ 
 | Deliverable | Implementation |
 |---|---|
-| DDL for raw, staging and country tables | `snowflake/01_setup/04_raw_tables.sql`; staging, core and gold tables are created by dbt |
-| Staging with Age and Stale_Member | `stg_members` (staging); Age and Stale_Member in `core_members` (see decisions) |
-| Per country tables, latest record wins | `core_members` (latest record) and the gold country tables |
-| Flatten the JSON and join to members | `stg_redemptions` (flatten), `member_redemptions` (join on member_id) |
-| Data validations | dbt tests on staging and core, failing rows in `TEST_FAILURES` |
+| DDL for raw, staging and country tables | Raw: `snowflake/01_setup/04_raw_tables.sql`. Staging, core and country tables are defined as dbt models and created by `dbt build`, which generates the `CREATE TABLE` statements (see `dbt/target/run` or `dbt compile`) |
+| Age and Stale_Member | `core_members` (see decisions) |
+| Per country tables, latest record wins | `core_members` (latest record) and the five gold country tables |
+| Flatten the JSON and join to members | `stg_redemptions` (one row per transaction), `member_redemptions` (join on `member_id`) |
+| Data validations | dbt data and unit tests on staging and core, failing rows stored in `TEST_FAILURES` for data tests |
 
 ## Decisions and assumptions
 

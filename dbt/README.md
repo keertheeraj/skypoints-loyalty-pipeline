@@ -1,15 +1,19 @@
-Welcome to your new dbt project!
+# dbt project: skypoints_transformations
 
-### Using the starter project
+Transforms the raw SkyPoints feeds into staging, core and per country gold tables.
+See the repository [README](../README.md) for the architecture, decisions and how to run.
 
-Try running the following commands:
-- dbt run
-- dbt test
+| Folder | Contents |
+|---|---|
+| `models/01_staging` | Cleaned and typed copies of the raw feeds, incremental on `LOADED_AT` |
+| `models/02_core` | One row per member and per transaction; country, Age and Stale_Member |
+| `models/03_gold` | Per country member tables and member redemptions |
+| `seeds` | `country_mapping` (REFERENCE schema) |
+| `macros` | Schema naming, string cleaning, file timestamp, country members |
+| `tests` | Generic tests (`max_length`, `non_negative`) and singular data tests |
 
-
-### Resources:
-- Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
-- Check out [Discourse](https://discourse.getdbt.com/) for commonly asked questions and answers
-- Join the [chat](https://community.getdbt.com/) on Slack for live discussions and support
-- Find [dbt events](https://events.getdbt.com) near you
-- Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+```powershell
+dbt seed
+dbt build                                      # Age and Stale_Member as of today
+dbt build --vars "{run_date: '2024-01-16'}"    # reproduce the sample data results
+```
